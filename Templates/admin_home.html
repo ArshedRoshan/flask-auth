@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Accounts</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Accounts</h1>
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Is Admin</th>
+                <th>Is Active</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+    </table>
+
+    <script>
+        // Function to block or unblock a user
+        function toggleUserBlock(id, isActive) {
+            const url = `http://127.0.0.1:5000/block_user/${id}`;
+            const method = 'POST';
+            const body = JSON.stringify({ is_active: isActive });
+            const headers = { 'Content-Type': 'application/json' };
+
+            fetch(url, { method, body, headers })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the UI based on the response
+                    if (data.message === 'Blocked') {
+                        alert('User blocked.');
+                    } else if (data.message === 'Unblocked') {
+                        alert('User unblocked.');
+                    } else {
+                        alert('An error occurred.');
+                    }
+                })
+                .catch(error => console.error(error));
+        }
+
+        // Fetch user data from the Flask API
+        fetch('http://127.0.0.1:5000/admin_home')
+            .then(response => response.json())
+            .then(data => {
+                const userTableBody = document.getElementById('userTableBody');
+
+                // Iterate over each user and create a table row
+                data.forEach(user => {
+                    const row = document.createElement('tr');
+
+                    // Create table cells for each user attribute
+                    const usernameCell = document.createElement('td');
+                    usernameCell.textContent = user.username;
+                    row.appendChild(usernameCell);
+
+                    const isAdminCell = document.createElement('td');
+                    isAdminCell.textContent = user.is_admin;
+                    row.appendChild(isAdminCell);
+
+                    const isActiveCell = document.createElement('td');
+                    isActiveCell.textContent = user.is_active;
+                    row.appendChild(isActiveCell);
+
+                    const actionCell = document.createElement('td');
+                    const blockButton = document.createElement('button');
+                    blockButton.textContent = user.is_active ? 'Block' : 'Unblock';
+                    blockButton.addEventListener('click', () => {
+                        const isActive = !user.is_active;
+                        toggleUserBlock(user.id, isActive);
+                    });
+                    actionCell.appendChild(blockButton);
+                    row.appendChild(actionCell);
+
+                    userTableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error(error));
+    </script>
+</body>
+</html>

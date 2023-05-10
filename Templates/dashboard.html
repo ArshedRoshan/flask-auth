@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to the Dashboard</h1>
+    <div id="username-container">
+        <h2>Loading...</h2>
+    </div>
+    <button id="logout-button">Logout</button>
+    <script>
+        function logout() {
+            fetch("http://localhost:5000/logout")
+                .then(response => response.json())
+                .then(data => {
+                    console.log('logut',data.message)
+                    if (data.message === "Logout successful") {
+                        window.location.href = "login.html";
+                    } else {
+                        alert("Logout failed");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error.message);
+                });
+        }
+
+        // Event listener for logout button
+        document.getElementById("logout-button").addEventListener("click", logout);
+
+
+
+
+        fetch("http://localhost:5000/dashboard")
+            .then(response => response.json())
+            .then(data => {
+                var usernameContainer = document.getElementById("username-container");
+                usernameContainer.innerHTML = "<h2>Welcome, " + data.username + "!</h2>";
+            })
+            .catch(error => {
+                console.error("Error:", error.message);
+            });
+    </script>
+</body>
+</html>
